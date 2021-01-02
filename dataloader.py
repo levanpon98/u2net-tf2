@@ -12,11 +12,13 @@ from skimage import io, transform, color
 class Dataset(tf.keras.utils.Sequence):
     def __init__(self,
                  data_path,
+                 batch_size=16,
                  rescale=320,
                  random_crop=(288, 288),
                  to_tensor_flag=0):
 
         self.data_path = data_path
+        self.batch_size = batch_size
         self.rescale_size = rescale
         self.random_crop_size = random_crop
         self.load_raw_data()
@@ -28,7 +30,7 @@ class Dataset(tf.keras.utils.Sequence):
         relation = pd.read_csv(meta_data, delim_whitespace=True,
                                na_filter=False)
         relation = shuffle(relation)
-        self.idx = list(item['orig_idx'] for idx, item in relation.iterrows())
+        self.indexes = list(item['orig_idx'] for idx, item in relation.iterrows())
 
     def load_image_mask(self, data_path, data):
         imgs = []
@@ -163,11 +165,8 @@ class Dataset(tf.keras.utils.Sequence):
         # return
         return tmpImg, tmpLbl
 
-    def __len__(self):
-        return len(self.idx)
-
-    def __getitem__(self, index):
-        image_idx = self.idx[index]
+    def data_generation(self, idx):
+        image_idx = self.indexes[idx]
         image = io.imread(os.path.join(
             self.data_path, 'CelebA-HQ-img', str(image_idx) + '.jpg'))
         label = io.imread(os.path.join(
@@ -182,11 +181,26 @@ class Dataset(tf.keras.utils.Sequence):
         image, label = self.rescale(image, label)  # rescale
         image, label = self.random_crop(image, label)  # random crop
         image, label = self.normalize(image, label)
-        image = tf.convert_to_tensor(image)
-        label = tf.convert_to_tensor(label)
-        # to tensor
 
         return image, label
+
+    def __len__(self):
+        return len(self.indexes)
+
+    def __getitem__(self, index):
+        indexes = self.indexes[index * self.batch_size: (index + 1) * self.batch_size]
+        images = []
+        labels = []
+        for idx in indexes:
+            image, label = self.data_generation(idx)
+            images.append(image)
+            labels.append(label)
+
+        # to tensor
+        images = tf.convert_to_tensor(images)
+        labels = tf.convert_to_tensor(labels)
+
+        return images, labels
 
 
 if __name__ == '__main__':

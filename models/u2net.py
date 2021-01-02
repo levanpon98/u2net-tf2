@@ -1,5 +1,11 @@
+"""
+Description       : 
+Author            : LE VAN PON
+Maintainer        :
+Date              : 02/01/2021
+Version           : 1.0
+Usage             : 
+Notes             :
+"""
 import tensorflow as tf
 
-
-def conv2d(input, filters, dirate):
-    conv_s1 = tf.keras.layers.Conv2D(filters=filters)
