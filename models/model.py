@@ -378,6 +378,7 @@ class U2NET(keras.models.Model):
         hx = self.pool56(hx5)
 
         hx6 = self.stage6(hx)
+
         hx6up = self.upsample_6(hx6)
         side6 = self.upsample_out_6(self.side6(hx6))
 

@@ -8,6 +8,8 @@ import tensorflow as tf
 from sklearn.utils import shuffle
 from skimage import io, transform, color
 
+from models.u2net import u2net
+
 
 class Dataset(tf.keras.utils.Sequence):
     def __init__(self,
@@ -30,7 +32,7 @@ class Dataset(tf.keras.utils.Sequence):
         relation = pd.read_csv(meta_data, delim_whitespace=True,
                                na_filter=False)
         relation = shuffle(relation)
-        self.indexes = list(item['orig_idx'] for idx, item in relation.iterrows())
+        self.indexes = list(item['idx'] for idx, item in relation.iterrows())
 
     def load_image_mask(self, data_path, data):
         imgs = []
@@ -166,11 +168,10 @@ class Dataset(tf.keras.utils.Sequence):
         return tmpImg, tmpLbl
 
     def data_generation(self, idx):
-        image_idx = self.indexes[idx]
         image = io.imread(os.path.join(
-            self.data_path, 'CelebA-HQ-img', str(image_idx) + '.jpg'))
+            self.data_path, 'CelebA-HQ-img', str(idx) + '.jpg'))
         label = io.imread(os.path.join(
-            self.data_path, 'CelebAMaskHQ-mask', str(image_idx) + '.png'))
+            self.data_path, 'CelebAMaskHQ-mask', str(idx) + '.png'))
 
         if 3 == len(image.shape) and 2 == len(label.shape):
             label = label[:, :, np.newaxis]
@@ -196,15 +197,22 @@ class Dataset(tf.keras.utils.Sequence):
             images.append(image)
             labels.append(label)
 
-        # to tensor
-        images = tf.convert_to_tensor(images)
-        labels = tf.convert_to_tensor(labels)
+        # images, labels = np.array(images), np.array(labels)
+        images = np.transpose(images, (0, 2, 3, 1))
+        labels = np.transpose(labels, (0, 2, 3, 1))
 
+        # images = tf.convert_to_tensor(images, np.float32)
+        # labels = tf.convert_to_tensor(labels, np.float32)
         return images, labels
 
 
 if __name__ == '__main__':
     dataset = Dataset('/home/ponlv/work/data/CelebAMask-HQ')
+    x, y = dataset[0]
+    out = u2net(x, 32)
+    print(out.shape)
+    print(x.shape)
+    print(y.shape)
     # # print(next(dataset))
     # data_path = '/home/ponlv/work/data/CelebAMask-HQ'
     # image = io.imread(os.path.join(
