@@ -51,6 +51,7 @@ def main(_):
             summary_writer = tf.summary.FileWriter('./logs')
             for epoch in range(FLAGS.epochs):
                 for step in tqdm.tqdm(range(0, num_step)):
+                    print(step)
                     batch_x, batch_y = datasets[step]
 
                     _, loss, summary = sess.run([train_op, loss_op, summary_loss], feed_dict={X: batch_x,
