@@ -124,7 +124,7 @@ def rsu5(inputs, mid_channels, out_channels, name='rsu5'):
         hx = tf.layers.max_pooling2d(hx3, 2, 2, name='max_pooling_3')
 
         hx4 = conv_block(hx, out_channels=mid_channels, dirate=1, name='b4')
-        hx5 = conv_block(hx, out_channels=mid_channels, dirate=2, name='b5')
+        hx5 = conv_block(hx4, out_channels=mid_channels, dirate=2, name='b5')
 
         hx4d = conv_block(tf.concat([hx5, hx4], axis=3), out_channels=mid_channels, dirate=1, name='hx4d_concat')
         hx4dup = resize_bilinear(hx4d)
@@ -152,7 +152,7 @@ def rsu4(inputs, mid_channels, out_channels, name='rsu4'):
         hx = tf.layers.max_pooling2d(hx2, 2, 2, name='max_pooling_2')
 
         hx3 = conv_block(hx, out_channels=mid_channels, dirate=1, name='b3')
-        hx4 = conv_block(hx, out_channels=mid_channels, dirate=2, name='b4')
+        hx4 = conv_block(hx3, out_channels=mid_channels, dirate=2, name='b4')
 
         hx3d = conv_block(tf.concat([hx4, hx3], axis=3), out_channels=mid_channels, dirate=1, name='hx3d_concat')
         hx3dup = resize_bilinear(hx3d)

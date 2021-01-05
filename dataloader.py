@@ -186,33 +186,33 @@ class Dataset(tf.keras.utils.Sequence):
         return image, label
 
     def __len__(self):
-        return len(self.indexes)
+        return len(self.indexes) // self.batch_size
 
     def __getitem__(self, index):
         indexes = self.indexes[index * self.batch_size: (index + 1) * self.batch_size]
         images = []
         labels = []
+
         for idx in indexes:
             image, label = self.data_generation(idx)
             images.append(image)
             labels.append(label)
 
-        # images, labels = np.array(images), np.array(labels)
+        images, labels = np.array(images), np.array(labels)
         images = np.transpose(images, (0, 2, 3, 1))
         labels = np.transpose(labels, (0, 2, 3, 1))
-
+        labels = np.expand_dims(labels, -1)
         # images = tf.convert_to_tensor(images, np.float32)
         # labels = tf.convert_to_tensor(labels, np.float32)
         return images, labels
 
 
 if __name__ == '__main__':
-    dataset = Dataset('/home/ponlv/work/data/CelebAMask-HQ')
-    x, y = dataset[0]
-    out = u2net(x, 32)
-    print(out.shape)
-    print(x.shape)
-    print(y.shape)
+    dataset = Dataset('/home/ponlv/work/data/CelebAMask-HQ', batch_size=1)
+    print(len(dataset) // 1)
+    for i in range(len(dataset) // 1):
+        x, y = dataset[i]
+        print(i)
     # # print(next(dataset))
     # data_path = '/home/ponlv/work/data/CelebAMask-HQ'
     # image = io.imread(os.path.join(
